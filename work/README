@@ -1,0 +1,89 @@
+!===============================================================================
+!
+! work/README
+!
+!-------------------------------------------------------------------------------
+!
+! Copyright (C) 2006-2012 Hinnerk Stueben
+!
+! This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+!
+! BQCD is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! BQCD is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+!
+!-------------------------------------------------------------------------------
+
+This directory contains the following files:
+
+Makefile           : commands for running single processor tests
+
+README             : this file
+
+input.test         : small example for verifying that the program is correct
+input.test.orig    : backup copy of input.test
+out.test.reference : reference output
+
+input.quick-test         : quick/simple test
+input.quick-test.orig    : backup copy of input.quick-test
+out.quick-test.reference : reference output
+
+input.mpp          : input that has to be used in the MPP benchmark
+input.mpp.orig     : backup copy of input.mpp
+out.mpp.reference  : reference output
+
+input.smp          : input that has to be used in the SMP benchmark
+input.smp.orig     : backup copy of input.smp
+out.smp.reference  : reference output
+
+Below are given some explanations on the input file which are useful in
+the benchmarking process:
+
+------------------------------------------------------------------------------
+run                   571             names of restart files will contain 'run'
+                                      can be set to 0
+
+lattice               48 48 48 96     lattice size, can be modified for
+                                      testing (eg weak scaling analysis)
+
+processes             2 12 12 24      number of MPI-proceses per direction
+                                      (1 1 1 1 for a single process)
+
+boundary_conditions_fermions 1 1 1 -1 do not change
+
+beta  5                               do not change
+kappa 0.13                            do not change
+csw   1.923076923076923               do not change
+
+hmc_test              0               do not change
+hmc_model             A               do not change
+hmc_rho               0.0             do not change
+hmc_trajectory_length 0.2             do not change
+hmc_steps             20              can be lowered -> shorter execution time
+hmc_accept_first      1               do not change
+hmc_m_scale           1               do not change
+
+start_configuration   cold            do not change
+start_random          default         do not change
+
+mc_steps              2               can be set to 1 -> shorter execution time
+mc_total_steps        100             do not change
+mc_save_frequency     0               do not change
+
+solver_rest                  1e-99    do not change
+solver_maxiter               100      can be lowered -> shorter execution time
+solver_ignore_no_convergence 2        do not change (CG will not converge, 
+                                      the numbers of iterations per call
+                                      will be exactly 'solver_maxiter') 
+solver_mre_vectors           0        do not change
+
+!===============================================================================

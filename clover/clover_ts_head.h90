@@ -1,0 +1,17 @@
+  use module_vol
+  implicit none
+
+  SU3_FIELD      :: w
+  CLOVER_FIELD_C :: t
+
+  integer        :: i, c1, c2
+
+  ! statement function:
+  
+  COMPLEX :: i_times, c
+  i_times(c) = cmplx(-aimag(c), real(c), kind = RKIND)
+
+  !$omp parallel do private(c1, c2)
+  do i = 1, volh
+     do c2 = 1, NCOL
+        do c1 = 1, NCOL

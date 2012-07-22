@@ -1,0 +1,113 @@
+ >BeginJob
+ >BeginHeader
+ Program bqcd benchmark2 (revision 390) 
+ Version_of_D           21
+ Communication single_pe
+ Run            0
+ Job            1
+ Host bicegate0           
+ Date 2012-02-06 11:36:30.500
+ L              4    4    4    4
+ NPE            1    1    1    1
+ bc_fermions    1    1    1   -1
+ gamma_index    1    2    3    4
+ Threads            1
+ Start              1
+ Seed                        0
+ Swap_seq           0
+ N_force           10
+ N_traj             1
+ N_save             0
+ N_temper           1
+ beta_1        5
+ kappa_1       0.13
+ csw_1         2.3327
+ csw_kappa_1      0.303251000000000
+ h_1           0
+ tau_1            0.020000000000000
+ N_tau_1       10
+ traj_length_1 0.2
+ rho_1         0.1
+ m_scale_1     3
+ HMC_model C
+ REAL_kind            8
+ CG_rest  1e-5
+ MRE_vectors            7
+ >EndHeader
+ >BeginForceAcceptance
+ T%fa i_fa    e     PlaqEnergy  exp(-Delta_H) CGcalls CGitTot CGitMax
+ T%it  traj  iterations(F1)  iterations(F2)
+  %it    -9              74              51
+ T%Favg  traj         F_gauge               F_det                F_F1                F_F2    
+ T%Fmax  traj         F_gauge               F_det                F_F1                F_F2    
+  %Favg    -9     1.918735869        0.7921703084E-01     1.221737362        0.1054942591    
+  %Fmax    -9     3.111678399        0.1294509655         1.286545631        0.1226594719    
+  %fa   -9    1   0.2460441746   0.4559411236      43     133       8
+ >EndForceAcceptance
+ >BeginFooter
+ Date 2012-02-06 11:36:31.999
+ Seed       77572834801261
+ CPU-Time      1.5 s on     1 CPUs
+ >BeginTiming
+                                                Performance
+ region             #calls     time       mean      min      max      Total
+                                  s    Mflop/s  Mflop/s  Mflop/s    Gflop/s
+
+ d_xf                 1372     0.02    2684.03  2684.03  2684.03       2.68
+ d_xb                    0                                                 
+ d_yf                 1372     0.02    2713.32  2713.32  2713.32       2.71
+ d_yb                    0                                                 
+ d_zf                 1372     0.02    2722.19  2722.19  2722.19       2.72
+ d_zb                    0                                                 
+ d_t                  1372     0.02    2578.89  2578.89  2578.89       2.58
+ D_TOTAL              1372     0.10    2203.04  2203.04  2203.04       2.20
+ MTDAGMT               176     0.08    2072.75  2072.75  2072.75       2.07
+ global_sum              0                                                 
+ global_sum_vec          0                                                 
+ sc_zero                35     0.00                                        
+ sc_copy                44     0.00                                        
+ sc_scale              236     0.00    1738.61  1738.61  1738.61       1.74
+ sc_norm2              472     0.00    1812.45  1812.45  1812.45       1.81
+ sc_dot                791     0.00    1664.54  1664.54  1664.54       1.66
+ sc_axpy              1129     0.00    2462.26  2462.26  2462.26       2.46
+ sc_xpby               734     0.00    1981.25  1981.25  1981.25       1.98
+ sc_axpby                0                                                 
+ sc_cdotc              894     0.00    2399.81  2399.81  2399.81       2.40
+ sc_caxpy               32     0.00    2204.90  2204.90  2204.90       2.20
+ sc_caxpy2              64     0.00    2852.17  2852.17  2852.17       2.85
+ sc_cax2                38     0.00    2962.94  2962.94  2962.94       2.96
+ CG                     43     0.08    2046.40  2046.40  2046.40       2.05
+ hmc_init_p              1     0.00                                        
+ hmc_u                  30     0.02                                        
+ dsg                    31     0.05                                        
+ dsf                    42     0.01                                        
+ clover_init            31     0.22                                        
+ clover_mult_a         644     0.02    2180.96  2180.96  2180.96       2.18
+ clover_mult_ao        644     0.02    2250.02  2250.02  2250.02       2.25
+ clover_mult_b         456     0.01    2855.99  2855.99  2855.99       2.86
+ clover_dsd             31     0.27                                        
+ clover_dsf             84     0.70                                        
+ HMC                     1     1.43                                        
+ plaquette               3     0.00    2907.32  2907.32  2907.32       2.91
+ cooling                 0                                                 
+ u_read                  0                                                 
+ u_write                 1     0.03                                        
+ TOTAL                   1     1.51                                        
+ hmc_init                1     0.00                                        
+ hmc_momenta             0                                                 
+ hmc_phi                 1     0.01                                        
+ hmc_h_old               1     0.00                                        
+ hmc_backup              1     0.00                                        
+ hmc_half_step0          1     0.09                                        
+ hmc_half_step1          0                                                 
+ hmc_xbound_g           30     0.00                                        
+ hmc_steps              40     1.10                                        
+ hmc_h_new               1     0.00                                        
+ hmc_rest                1     0.00                                        
+ h_mult_a                0                                                 
+ h_mult_b                0                                                 
+ h_mult_c                0                                                 
+ sc2_projection       1372     0.02     592.00   592.00   592.00       0.59
+ >EndTiming
+ >EndFooter
+ >EndJob

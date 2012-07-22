@@ -1,0 +1,30 @@
+ >BeginConfInfoHeader
+ Format           3
+ Program bqcd benchmark2
+ Run           0
+ Traj          10
+ Host nvsocal1            
+ Date 2012-07-19 17:22:58.189
+ L  4  4  4  4
+ bc_fermions  1  1  1 -1
+ REAL_kind           8
+ PlaqEnergy      0.46050262386884E+00
+ ensemble           1
+ beta 5
+ kappa 0.13
+ csw 2.3327
+ csw_kappa    0.303251000000000
+ h 0
+ former_ensemble           1
+ former_beta 5
+ former_kappa 0.13
+ former_csw 2.3327
+ former_csw_kappa    0.303251000000000
+ former_h 0
+ >EndConfInfoHeader
+ >BeginCheckSum
+ bqcd.000.1.00.u           1149912638                24576
+ bqcd.000.1.01.u           1240128209                24576
+ bqcd.000.1.02.u            538911187                24576
+ bqcd.000.1.03.u           2183833690                24576
+ >EndCheckSum

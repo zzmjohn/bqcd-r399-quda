@@ -1,0 +1,55 @@
+#===============================================================================
+#
+# Makefile-sun.var - settings on Sun
+#
+#-------------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2001 Hinnerk Stueben
+#
+# This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+#
+# BQCD is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# BQCD is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+#
+#-------------------------------------------------------------------------------
+
+SHELL     = /bin/ksh
+
+MODULES_FLAG = -M$(MODULES_DIR)
+
+# use GNU C-preprocessor (well hidden on our Sun):
+
+FPP       = /sw/sun4_56/egcs-1.1.2-2/lib/gcc-lib/sparc-sun-solaris2.6/egcs-2.91.66/cpp -C -P
+F90       = /opt/SUNWspro/bin/f90
+CC        = gcc
+AR        = ar
+RANLIB    = echo
+
+MYFLAGS   = -DTIMING -DD3_BUFFER_VOL=1
+FFLAGS    = -O3 $(MODULES_FLAG)
+CFLAGS    = -O3 -DNamesToLower_ -DLongLong
+ARFLAGS   = rv
+
+LDFLAGS   = 
+SYSLIBS   =
+
+FAST_MAKE = make
+
+RANDOM_O  = ran.o ranf.o
+UUU_O     = uuu_f90.o
+
+LIBD      = libd.a
+LIBCOMM   = lib_single_pe.a
+LIBCLOVER = libclover.a
+
+#===============================================================================

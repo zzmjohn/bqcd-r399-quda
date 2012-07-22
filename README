@@ -1,0 +1,405 @@
+!===============================================================================
+!
+! README
+!
+!-------------------------------------------------------------------------------
+!
+! Copyright (C) 2006-2012 Hinnerk Stueben
+!
+! This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+!
+! BQCD is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! BQCD is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+!
+!-------------------------------------------------------------------------------
+
+! 2012 M Clark
+!
+! This is a branch of the BQCD benchmark (r399) with added QUDA support
+! for the linear solver.  This enables the CG solver to run on CUDA
+! enabled GPUs. The new addition to BQCD is mostly contained in
+! invert_quda.F90 source file.  The files modules/typedef_quda.F90 and
+! quda_defs.h are actually part of QUDA and will eventually be subsumed
+i! nto QUDA, they are only here for current development.
+
+Subdirectories
+~~~~~~~~~~~~~~
+
+clover	  clover improvement routines
+
+comm	  communication routines
+
+d	  'D-slash' operation (sparse matrix times vector multiplication)
+
+modules   Fortran90 modules that are needed in more than one directory
+
+platform  Makefiles
+
+work	  working directory
+
+
+General remarks
+~~~~~~~~~~~~~~~
+
+The code was tested on the following (software) platforms
+(see platform/Makefile-<platform>.var): 
+
+# Makefile-gnu-mpich.var - GNU compiler, Open-MPI
+                           compiler: gfortran 4.5.2
+
+# Makefile-intel-mpt.var - Intel compiler, SGI Message Passing Toolkit (MPT)
+                           compiler: ifort 12.1.7
+
+# Makefile-pgi.var       - PGI compiler, no MPI
+                           compiler: pgf90 11.8
+
+# Makefile-ibm-bgp.var   - IBM BlueGene/P
+                           compiler: mpixlf2003_r 11.1
+
+
+To work on either of these platforms a corresponding Makefile.var can be
+prepared by entering 'make prep-<platform>':
+
+bicegate1> make prep-gnu-mpich
+make prep PLATFORM=gnu-mpich
+rm -f Makefile.var
+ln -s platform/Makefile-gnu-mpich.var Makefile.var
+
+For other platforms Makefile.var has to be setup appropriately
+(see platform/Makefile-EXPLAINED.var).
+
+Fortran source files have extension .F90.  Preprocessed files (.f90) are
+always kept for inspection.
+
+
+Resource requirements
+~~~~~~~~~~~~~~~~~~~~~
+
+The resource requirements are approximately:
+
+MPP: total memory   : 160 GByte
+     size of output :   4 GByte
+     execution time :  60 s at 8 TFlop/s
+
+SMP: total memory   :   9 GByte
+     size of output : .25 GByte
+     execution time : 125 s at 35 GFlop/s
+
+
+Porting
+~~~~~~~
+
+*** make
+
+The Makefiles are GNU-Makefiles.
+
+'make fast' can be used for a parallel 'make'.
+
+'make fast' builds the binary 'bqcd.'
+
+Without 'make fast' one has to enter:
+
+   make Modules
+   make libs
+   make bqcd
+
+
+*** C preprocessor
+
+The GNU C preprocessor is needed for building the source.
+
+Other C proprocessors might work as well.  The preprocessor must be able
+to handle the string concatenation macro '##'.  
+
+For processing the Fortran90 separator '%' this trick was used:
+
+module_input.o: module_input.F90
+        $(fpp) $< | sed s/FORTRAN_PERCENT/%/g > $*.f90
+        $(F90) -c $(FFLAGS) $*.f90
+
+
+*** Service routines and 'stderr'
+
+Service routine (system calls) are kept in 'service.F90'.  Today they
+routines needed are available in Fortran except 'hostnm' for obtaining
+the hostname.
+
+It is assumed that Fortran unit 0 is pre-connected to stderr. If this
+is not the case on your machine you should re-#define STDERR in 'defs.h'.
+
+For the time measurements it is important to use a time function with
+high resolution in function 'sekunden()'.  
+
+
+
+*** Definitions in 'defs.h'
+
+It might be necessary to change the following definitions:
+
+# define RKIND  8                    // kind of 'real' data type
+                                     // has to be 64-bit
+
+# define CHECK_SUM integer(8)        // 64-bit integer
+# define SEED integer(8)             // 64-bit integer
+# define SECONDS real(8)             // could be changed eg in case to avoid
+                                     // scaling from ticks to seconds
+                                     // in function 'sekunden' in service.F90
+
+# define BQCD_REAL mpi_real8         // the MPI-type that corresponds to 
+                                     // real(kind=RKIND) 
+
+# define BQCD_CHECK_SUM mpi_integer8 // the MPI-type that corresponds to 
+                                     // CHECK_SUM 
+# define BQCD_SEED mpi_integer8      // the MPI-type that corresponds to SEED
+
+
+
+*** Check sums (calling C from Fortran)
+
+In file cksum.c the calling convention (upper/lower case of routine
+names, use of underscores) and the 64-bit integer type of C have to be
+defined, see:
+
+   #ifdef NamesToLower_
+   #ifdef NamesToLower
+   #ifdef LongLong
+
+
+*** Random numbers
+
+The random number generator is portable.  Hence results should be
+identical up rounding errors on all platforms.
+
+
+*** Message passing / Communication library
+
+Originally the communication was programd with the shmem library on
+a Cray T3E.
+
+Now MPI is mainly used.  There is also a single CPU version (that
+needs no communication library) and a combination of shmem for the
+most time consuming part and MPI.  
+
+See $(LIBCOMM) in platform/Makefile-EXPLAINED.var and 'Hints for
+optimisation' below.
+
+
+*** OpenMP
+
+In addition to setting your compiler's OpenMP option you have to add 
+'-D_OPENMP' in 'Makefile.var':
+
+   MYFLAGS = ... -D_OPENMP
+
+
+Verification
+~~~~~~~~~~~~
+
+*** Random numbers
+
+Correctness of random numbers can be checked by:
+
+   make the_ranf_test
+
+The test is done by comparison with reference output.  On most
+platforms there is no difference.  However, on Intel 'diff'
+usually reports differences in the last digit of the floating point
+representation of the random numbers; the integer representations
+match exactly, eg:
+
+<      1                    4711      0.5499394951912783
+---
+>      1                    4711      0.5499394951912784
+
+
+*** Argments from the command line
+
+Try command line argument '-V':
+
+bicegate1> ./bqcd -V
+ This is bqcd benchmark2 (revision 391) 
+    input format:               4
+    conf info format:           3
+    MAX_TEMPER:                50
+    REAL kind:                  8
+    Version of D:              21
+    Communication:   single_pe
+    Endianness:      little endian
+
+
+*** BQCD
+
+To check that the BQCD works correctly on can use the test case in the
+'work' directory:
+
+bicegate1> cd work
+bicegate1> make test
+rm -f out.TMP out.tmp
+../bqcd input.test out.TMP
+grep ' %[fim][atc]' out.TMP > out.tmp
+grep ' %[fim][atc]' out.test.reference | diff - out.tmp
+18c18
+<   %fa   -1    1   0.4319366404   1.0173348431      43     407      38
+---
+>   %fa   -1    1   0.4319366404   1.0173348435      43     407      38
+26c26
+<   %mc     3  1  1   0.4418361103   1.0294187878   1      43     443      43
+---
+>   %mc     3  1  1   0.4418361103   1.0294187879   1      43     443      43
+40c40
+<   %mc    10  1  1   0.4605026239   0.9846280642   1      43     461      44
+---
+>   %mc    10  1  1   0.4605026239   0.9846280641   1      43     461      44
+make: *** [test] Error 1
+
+The test can be run for any domain decomposition and any number of
+threads.  In any case result should agree.  Floating point numbers might
+differ in the last digit (or sometimes in the second last digit) as
+shown above.  In total 20 lines containing floating point numbers are
+compared.
+
+There is also a quick test in which only one line of floating point
+numbers is generated and compared:
+
+bicegate1> make quick-test
+rm -f out.TMP out.tmp
+../bqcd input.quick-test out.TMP
+grep ' %[fim][atc]' out.TMP > out.tmp
+grep ' %[fim][atc]' out.quick-test.reference | diff - out.tmp
+
+The quick test was passed without any differences by all compilers
+mentioned above.
+
+
+*** Check sums
+
+BQCD writes restart files in the working directory.  The extension of
+the file containing information on the run is '.info'.  It contains
+check sums of the binary data files (the example was run after the
+test run):
+
+bicegate1>  tail -6 bqcd.000.1.info
+ >BeginCheckSum
+ bqcd.000.1.00.u            3864922760                 24576
+ bqcd.000.1.01.u            2933698981                 24576
+ bqcd.000.1.02.u            2302189780                 24576
+ bqcd.000.1.03.u             659368547                 24576
+ >EndCheckSum
+
+These check sums should be identical to check sums calculated by the
+'cksum' command:
+
+bicegate1> cksum bqcd.000.1.*.u | awk '{print $3, $1, $2}'
+bqcd.000.1.00.u 3864922760 24576
+bqcd.000.1.01.u 2933698981 24576
+bqcd.000.1.02.u 2302189780 24576
+bqcd.000.1.03.u 659368547 24576
+
+
+Structure of the input
+~~~~~~~~~~~~~~~~~~~~~~
+
+The structure of the input is explained in 'work/README'.
+
+
+Hints on optimisation
+~~~~~~~~~~~~~~~~~~~~~
+
+Before starting any optimisation one should find the fastest variant
+in the existing code.  There are two libraries to look at: $(LIBD) and
+$(LIBCOMM).
+
+
+*** LIBD (directory: d)
+
+There are the following variants.
+
+libd1.a:  First version (on Cray T3E).
+There are seven loops:
+
+   'xf' : x-forward
+   'xb' : x-backward
+   'yf' : y-forward
+   'yb' : y-backward
+   'zf' : z-forward
+   'zb' : z-backward
+   't'  : t forward and backward
+
+libd2.a:  Loop fusion of the x,y,z forward/backward loops.  (For
+compatibility the names are: 'xf', 'yf', 'zf', 't'.)  This is a good 
+starting point for the SMP benchmark. 
+
+libd21.a: This variant makes use of the fact that the amount of data to
+be communicated can be halved by projecting four spinor components onto
+'two-component spinors'.  This reduces the communication overhead.  On
+the other hand the projection generates more traffic to the local
+memory.  This is a good starting point for the MPP benchmark. 
+
+libd3.a:  Overlap of communication and computation implemented with
+OpenMP.  The loops are the same as in libd2.a, but the master thread
+communicates while the other threads do calculations.  In this variant
+the x-direction must not be decomposed and at least two threads are
+needed per MPI-process.
+
+
+*** LIBCOMM ('communication', directory: comm)
+
+There are the following variants:
+
+lib_single_pe.a:  Single CPU version (PE: 'processing element').
+
+lib_mpi.a:        MPI version.
+
+lib_shmempi.a:    shmem for nearest neighbour communication, MPI for the rest.
+
+
+*** Caveat
+
+Not all combinations of LIBD and LIBCOMM have been implemented.
+
+The following combinations should work (lib_mpi.a always works):
+
+LIBD	  LIBCOMM
+--------------------------------------------------
+libd1.a   lib_single_pe.a lib_mpi.a lib_shmempi.a
+libd2.a   lib_single_pe.a lib_mpi.a lib_shmempi.a
+libd21.a  lib_single_pe.a lib_mpi.a lib_shmempi.a
+libd3.a                   lib_mpi.a
+
+
+Rules for time measurements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In 'Makefile.var' '-DTIMING' must always be set:
+
+   MYFLAGS = -DTIMING ...
+
+The time measurements in cg() TIMING_START(timing_bin_cg)
+... TIMING_STOP(timing_bin_cg) must be kept.
+
+
+Bugs
+~~~~
+
+There is one known bug.  At very large numbers of processes (>~ 32k) a
+consistency check of the random number generator might fail.  The error
+message is: 
+
+   rancheck(): seeds differ
+
+In this case comment out
+
+   call write_ran()
+
+in the main program in bqcd.F90.  However, the tests mentioned above
+should always run successfully.

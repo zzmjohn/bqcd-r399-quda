@@ -1,0 +1,85 @@
+#===============================================================================
+#
+# Makefile-ibm-bgp.var - settings on IBM BlueGene/P
+#
+#-------------------------------------------------------------------------------
+#
+# Copyright (C) 2012 Hinnerk Stueben
+#
+# This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+#
+# BQCD is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# BQCD is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+#
+#-------------------------------------------------------------------------------
+
+timing    = 1
+mpi       = 1
+omp       = 
+debug     = 
+libd      = 21
+
+#-------------------------------------------------------------------------------
+
+SHELL     = /bin/ksh
+
+FPP       = cpp -E -C -P
+F90       = mpixlf2003_r
+CC        = mpixlc_r
+AR        = ar
+RANLIB    = echo
+
+MODULES_FLAG = -I$(MODULES_DIR)
+
+MYFLAGS   = -Dhostnm=hostnm_
+FFLAGS_STD= $(MODULES_FLAG)
+CFLAGS_STD= -DLongLong -DNamesToLower
+ARFLAGS   = rv
+
+LDFLAGS   =
+SYSLIBS   = 
+
+FAST_MAKE = make -j 8
+
+CKSUM_O   = cksum.o
+RANDOM_O  = ran.o ranf.o
+
+LIBD      = libd$(libd).a 
+LIBCOMM   = lib_single_pe.a
+LIBCLOVER = libclover.a
+
+#-------------------------------------------------------------------------------
+
+ifdef timing
+    MYFLAGS  += -DTIMING
+endif
+
+ifdef mpi
+    MYFLAGS  += -DUSE_MPI_WTIME
+    LIBCOMM   = lib_mpi.a
+endif
+
+ifdef omp
+    F90      += -qsmp=omp
+    MYFLAGS  += -D_OPENMP
+endif
+
+ifdef debug
+    FFLAGS    = -g -dfullpath $(FFLAGS_STD)
+    CFLAGS    = -g -dfullpath $(CFLAGS_STD)
+else
+    FFLAGS    = -O3 $(FFLAGS_STD) -qmaxmem=-1 -qarch=450d -qtune=450 -qsuppress=1500-036:1516-092
+    CFLAGS    = -O2 $(CFLAGS_STD)
+endif    
+
+#===============================================================================

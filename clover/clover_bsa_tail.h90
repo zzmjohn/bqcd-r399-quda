@@ -1,0 +1,10 @@
+        do cb = 1, NCOL
+           w(ca, cb, i) = a1 * conjg(b(1, cb, i)) &
+                        + a2 * conjg(b(2, cb, i)) &
+                        + a3 * conjg(b(3, cb, i)) &
+                        + a4 * conjg(b(4, cb, i))
+        enddo
+     enddo
+  enddo
+
+end

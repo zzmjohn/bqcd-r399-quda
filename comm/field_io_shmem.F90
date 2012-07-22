@@ -1,0 +1,147 @@
+!===============================================================================
+!
+! field_io_shmem.F90 - I/O routine for gauge and pseudo fermion fields (shmem)
+!
+!-------------------------------------------------------------------------------
+!
+! Copyright (C) 1998-2005 Hinnerk Stueben
+!
+! This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+!
+! BQCD is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! BQCD is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+!
+!-------------------------------------------------------------------------------
+# include "defs.h"
+# include "shmem.h"
+
+!-------------------------------------------------------------------------------
+subroutine field_io(action, m, mx, field, cksum)  ! read or write g- or sc-field
+
+  use typedef_cksum
+  use module_function_decl
+  use module_lattice
+  use module_vol
+  implicit none
+
+  character(len = *) :: action
+  integer            :: m, mx
+  COMPLEX            :: field(m, 0:mx-1, 0:NY-1, 0:NZ-1, 0:NT-1)
+  type(type_cksum)   :: cksum(0:LT-1)
+
+!!!  COMPLEX            :: buffer(m * mx * NY, 0:NPE(2)-1)
+!!!!dir$ symmetric         buffer
+  FILENAME           :: file
+  integer            :: i_pe(DIM)
+  integer, external  :: i_global, ilex
+  integer            :: t, t_global, z, me, pe, size, rec, recl
+  integer            :: size_field
+  integer            :: pe_x, pe_y, pe_z, pe_t
+  CHECK_SUM          :: check_sum(2), n_bytes
+
+  COMPLEX   :: buffer(m * mx * NY, 0:NPE(2)-1)
+  CHECK_SUM :: check_sum_master(2, 0:LT-1)
+
+  pointer(p_buffer, buffer)
+  pointer(p_check_sum_master, check_sum_master)
+
+  save p_buffer
+  save p_check_sum_master
+
+  logical, save :: initialized = .false.
+  integer       :: ierr
+
+     if (.not. initialized) then
+        call barrier()
+        call shpalloc(p_buffer, SIZE_COMPLEX * m * mx * NY * NPE(2), ierr, 1)
+        call barrier()
+        call shpalloc(p_check_sum_master, 2 * LT, ierr, 1)
+        initialized = .true.
+     endif
+
+  call barrier()
+
+  call unlex(my_pe(), DIM, i_pe, NPE)
+
+  if (i_pe(2) == 0 .and. i_pe(3) == 0) then
+     size       = SIZE_COMPLEX * m * mx * NY  ! size in shmem
+     size_field = size * NZ * NT              ! size of "field"
+     n_bytes    = size * RKIND * NPE(2)       ! no. of bytes of u_buf
+     recl       = n_bytes                     ! cast to standard integer
+
+     ASSERT(mod(recl, RECL_UNIT) == 0)
+     recl       = recl / RECL_UNIT
+
+     if (action == "write") call swap_endian8(size_field, field)
+
+     pe_t = i_pe(4)
+     do t = 0, NT - 1
+        t_global = i_global(t, NT, i_pe(4))
+
+        file = cksum(t_global)%file
+
+        open(UCONF, file = file, action = action, form = "unformatted", &
+             access = "direct", recl = recl)
+        rec = 0
+        call cksum_init()
+
+        do pe_z = 0, NPE(3) - 1
+           do z = 0, NZ - 1
+              rec = rec + 1
+
+              if (action == "read") then
+                 read(UCONF, rec = rec) buffer
+                 call cksum_add(buffer, n_bytes)
+              endif
+
+              do pe_y = 0, NPE(2) - 1
+                 pe_x = 0
+                 pe = ilex(DIM, (/pe_x, pe_y, pe_z, pe_t/), NPE)
+
+                 if (action == "read") then
+                    call shmem_put(field(1,0,0,z,t), buffer(1, pe_y), size, pe)
+                 else
+                    call shmem_get(buffer(1, pe_y), field(1,0,0,z,t), size, pe)
+                 endif
+
+              enddo
+              if (action == "write") then
+                 write(UCONF, rec = rec) buffer
+                 call cksum_add(buffer, n_bytes)
+              endif
+           enddo
+        enddo
+        close(UCONF)
+        call cksum_get(check_sum(1), check_sum(2))
+        if (action == "read") then
+              if (check_sum(1) /= cksum(t_global)%sum) then
+                 call die("field_io(): check sum error in file " // file)
+              endif
+        else
+           call shmem_put(check_sum_master(1, t_global), check_sum, 2, 0)
+        endif
+     enddo
+  endif
+  call barrier()
+
+  if (action == "write") then
+     do t_global = 0, LT - 1
+        cksum(t_global)%sum   = check_sum_master(1, t_global)
+        cksum(t_global)%bytes = check_sum_master(2, t_global)
+     enddo
+  endif
+
+  call swap_endian8(size_field, field)
+end
+
+!===============================================================================

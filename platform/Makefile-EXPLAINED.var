@@ -1,0 +1,86 @@
+#===============================================================================
+#
+# Makefile-EXPLAINED.var  
+#
+#-------------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2012 Hinnerk Stueben
+#
+# This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+#
+# BQCD is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# BQCD is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+#
+#-------------------------------------------------------------------------------
+
+# The following variables are set in Makefile.var:
+
+SHELL     = /bin/ksh
+
+MODULES_FLAG = -I$(MODULES_DIR)  # how to find 'modules'
+                                 # MODULES_DIR is set in every Makefile
+
+FPP       = cpp -E -C -P # Fortran preprocessor / ANSI C preprocessor
+F90       = f90          # Fortran compiler
+CC        = cc           # ANSI C compiler
+AR        = ar           # ar command
+RANLIB    = echo         # 'ranlib' if necessary
+
+MYFLAGS   = -DTIMING     # or <empty> to switch time measurement off
+                         # must always be set for benchmarking
+            -DUSE_MPI_WTIME
+                         # use MPI_Wtime() as timer
+                         # the default timer is 'call system_clock(count)'
+            -D_OPENMP    # has to be explicitly defined for OpenMP
+ 
+FFLAGS    = -O3          # Fortran compiler flags
+CFLAGS    = -O3          # C compiler flags
+ARFLAGS   = rv           # ar flags 
+
+LDFLAGS   =              # loader flags (the loader is: ${F90})
+SYSLIBS   =              # system libraries
+
+FAST_MAKE = make -j 8    # parallel make
+
+CKSUM_O   = cksum.o      # should not be changed in order to demonstrate
+                         # that C can be called from Fortran
+                         # (cksum_dummy.F90 contains stubs)
+
+RANDOM_O  = ran.o ranf.o # or 'ran.o' if ranf() is intrinsic
+
+LIBD      = libd1.a      # or 'libd2.a' or 'libd21.a' or 'libd3.a'
+
+LIBCOMM   = lib_mpi.a    # or 'lib_single_pe.a' or 'lib_shmempi.a'
+
+LIBCLOVER = libclover.a  # do not change
+
+#-------------------------------------------------------------------------------
+#
+# In the example Makefile.var's appear in addition:
+#
+# - Temporary variables for steering the make process:
+#
+#      timing    = 1   # switch on timing       : 1 or <empty> 
+#      mpi       =     # compile with MPI       : 1 or <empty> 
+#      omp       =     # compile with OpenMP    : 1 or <empty> 
+#      shmempi   =     # compile with 'shmempi' : 1 or <empty> 
+#      debug     =     # compile for debugging  : 1 or <empty> 
+#      libd      = 21  # version of 'libd'      : 1 or 2 or 21 or 3
+#
+# - Flags for Fortran and C compilers that are necessary to generate
+#   correct code:
+#
+#      FFLAGS_STD = $(MODULES_FLAG) ...
+#      CFLAGS_STD = -DNamesToLower_ ...
+#
+#===============================================================================

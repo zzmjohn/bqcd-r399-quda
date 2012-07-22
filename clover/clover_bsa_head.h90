@@ -1,0 +1,16 @@
+  use module_vol
+  implicit none
+
+  SU3_FIELD     :: w
+  SPINCOL_FIELD :: b, a
+  COMPLEX       :: a1, a2, a3, a4
+  integer       :: i, ca, cb
+
+  ! statement function:
+  
+  COMPLEX :: i_times, c
+  i_times(c) = cmplx(-aimag(c), real(c), kind = RKIND)
+
+  !$omp parallel do private(ca, cb, a1, a2, a3, a4)
+  do i = 1, volh
+     do ca = 1, NCOL

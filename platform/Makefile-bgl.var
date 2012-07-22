@@ -1,0 +1,116 @@
+#===============================================================================
+#
+# Makefile-bgl.var - settings on BlueGene/L
+#
+#-------------------------------------------------------------------------------
+#
+# Copyright (C) 2006 Hinnerk Stueben
+#
+# This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+#
+# BQCD is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# BQCD is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+#
+#-------------------------------------------------------------------------------
+
+timing    = 1
+debug     =
+bits64    = 
+libd      = 2
+d3_buffer_vol = 32*32*16*16
+
+#-------------------------------------------------------------------------------
+
+SHELL     = /bin/ksh
+
+FPP       = /opt/ibmcmp/vac/7.0/bin/blrts_xlc -E -C -P
+F90       = /opt/ibmcmp/xlf/9.1/bin/blrts_xlf90 -qsuffix=f=f90
+CC        = /opt/ibmcmp/vac/7.0/bin/blrts_xlc
+AR        = ar
+RANLIB    = echo
+
+BGLSYS    = /bgl/BlueLight/ppcfloor/bglsys
+
+MODULES_FLAG = -I$(MODULES_DIR)
+
+MYFLAGS   = -DIBM
+FFLAGS_STD= $(MODULES_FLAG) -I$(BGLSYS)/include
+CFLAGS_STD= -DLongLong -DNamesToLower
+ARFLAGS   = rv
+
+LDFLAGS   = -L$(BGLSYS)/lib
+SYSLIBS   = -lmpich.rts -lfmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
+
+FAST_MAKE = gmake -j 8
+
+CKSUM_O   = cksum.o
+RANDOM_O  = ran.o ranf.o
+UUU_O     = uuu_f90.o
+
+LIBD      = 
+LIBCOMM   = lib_mpi.a
+LIBCLOVER = libclover.a
+
+#-------------------------------------------------------------------------------
+
+ifdef timing
+    MYFLAGS  += -DTIMING
+endif
+
+ifdef mpi
+    LIBCOMM   = lib_mpi.a
+endif
+
+ifdef omp
+    F90      += -qsmp=omp
+    MYFLAGS  += -D_OPENMP
+endif
+
+ifdef debug
+    FFLAGS    = -g -qfullpath $(FFLAGS_STD)
+    CFLAGS    = -g -qfullpath $(CFLAGS_STD)
+else
+    FFLAGS    = -O3 -qhot $(FFLAGS_STD)
+    CFLAGS    = -O2 $(CFLAGS_STD)
+endif    
+
+ifdef bits64
+    F90      += -q64
+    CFLAGS   += -q64
+    ARFLAGS  += -X64
+else
+    LDFLAGS  +=
+endif
+
+
+ifeq ($(libd),1)
+    LIBD      = libd1.a
+    MYFLAGS  += -DD3_BUFFER_VOL=1
+endif
+
+ifeq ($(libd),2)
+    LIBD      = libd2.a
+    MYFLAGS  += -DD3_BUFFER_VOL=1
+endif
+
+ifeq ($(libd),21)
+    LIBD      = libd21.a
+    MYFLAGS  += -DD3_BUFFER_VOL=1
+endif
+
+ifeq ($(libd),3)
+    LIBD      = libd3.a
+    MYFLAGS  += -DD3_BUFFER_VOL='$(d3_buffer_vol)'
+endif
+
+#===============================================================================

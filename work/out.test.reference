@@ -1,0 +1,88 @@
+ >BeginJob
+ >BeginHeader
+ Program bqcd 3.0.1
+ Version_of_D            3
+ Run            0
+ Job            1
+ Host sr8000.lrz-muenc    
+ Date 2006-02-25 22:30:32.467
+ L            4  4  4  4
+ NPE          1  1  1  1
+ bc_fermions  1  1  1 -1
+ gamma_index  1  2  3  4
+ Threads            8
+ Start              1
+ Seed                        0
+ Swap_seq           0
+ N_force           10
+ N_traj            20
+ N_save             0
+ N_temper           1
+ beta_1        5
+ kappa_1       0.13
+ csw_1         2.3327
+ csw_kappa_1      0.303251000000000
+ h_1           0
+ tau_1            0.020000000000000
+ N_tau_1       10
+ traj_length_1 0.2
+ rho_1         0.1
+ m_scale_1     3
+ HMC_model C
+ REAL_kind            8
+ CG_rest  1e-5
+ MRE_vectors            7
+ >EndHeader
+ >BeginForceAcceptance
+ T%fa i_fa    e     PlaqEnergy  exp(-Delta_H) CGcalls CGitTot CGitMax
+ T%it  traj  iterations(F1)  iterations(F2)
+  %it    -9              74              51
+  %fa   -9    1   0.2460441746   0.4559411236      43     133       8
+  %it    -8             131              98
+  %fa   -8    1   0.3218620034   0.8280418670      43     249      22
+  %it    -7             157             124
+  %fa   -7    1   0.3703942410   0.9095167080      43     305      27
+  %it    -6             173             136
+  %fa   -6    1   0.3960531969   0.9631888079      43     335      31
+  %it    -5             185             151
+  %fa   -5    1   0.4095332565   0.9782234751      43     363      33
+  %it    -4             187             153
+  %fa   -4    1   0.4289963516   0.9790803949      43     369      36
+  %it    -3             188             155
+  %fa   -3    1   0.4296391707   1.0294650390      43     371      35
+  %it    -2             199             163
+  %fa   -2    1   0.4263744430   1.0282113216      43     390      36
+  %it    -1             207             169
+  %fa   -1    1   0.4319366404   1.0173348431      43     407      38
+  %it     0             196             173
+  %fa    0    1   0.4425807211   0.9974216475      43     398      40
+ >EndForceAcceptance
+ >BeginMC
+ T%mc  traj  e  f     PlaqEnergy  exp(-Delta_H) Acc CGcalls CGitTot CGitMax
+  %it     1             209             178
+  %mc     1  1  1   0.4537904832   0.9765638795   1      43     416      38
+  %it     2             216             193
+  %mc     2  1  1   0.4491132938   1.0307947771   1      43     440      42
+  %it     3             223             188
+  %mc     3  1  1   0.4418361103   1.0294187878   1      43     443      43
+  %it     4             223             187
+  %mc     4  1  1   0.4349500572   1.0459621763   1      43     441      42
+  %it     5             219             188
+  %mc     5  1  1   0.4365957242   0.9692420392   1      43     439      45
+  %it     6             214             186
+  %mc     6  1  1   0.4432273384   0.9771690736   1      43     430      40
+  %it     7             232             192
+  %mc     7  1  1   0.4491319815   0.9959077843   1      43     456      42
+  %it     8             229             204
+  %mc     8  1  1   0.4578264533   0.9729681151   1      43     464      42
+  %it     9             227             202
+  %mc     9  1  1   0.4632933680   1.0068031811   1      43     463      46
+  %it    10             233             195
+  %mc    10  1  1   0.4605026239   0.9846280642   1      43     461      44
+ >EndMC
+ >BeginFooter
+ Date 2006-02-25 22:31:06.186
+ Seed      116345201684837
+ CPU-Time     34.3 s on   8 CPUs
+ >EndFooter
+ >EndJob

@@ -1,0 +1,34 @@
+!===============================================================================
+!
+! modules/README
+!
+!-------------------------------------------------------------------------------
+!
+! Copyright (C) 2006 Hinnerk Stueben
+!
+! This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+!
+! BQCD is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! BQCD is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+!
+!-------------------------------------------------------------------------------
+
+This directory contain "modules" that are needed in more than one
+source files.  
+
+"modules" that are needed only in one file are kept in that file.
+
+For historical reasons some information is stored in more than one module.
+Many "modules" were "common blocks" in older versions of the program.
+
+!===============================================================================

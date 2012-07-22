@@ -1,0 +1,55 @@
+#===============================================================================
+#
+# Makefile-hitachi-omp.var - settings on Hitachi SR8000 
+#                            (fastest version: MPI +OpenMP)
+#
+#-------------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Hinnerk Stueben
+#
+# This file is part of BQCD -- Berlin Quantum ChromoDynamics program
+#
+# BQCD is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# BQCD is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with BQCD.  If not, see <http://www.gnu.org/licenses/>.
+#
+#-------------------------------------------------------------------------------
+
+SHELL     = /bin/ksh
+
+MODULES_FLAG = -I$(MODULES_DIR)
+
+FPP       = cpp -C -P -D_OPENMP
+F90       = mpif90
+CC        = cc
+AR        = ar
+RANLIB    = echo
+
+MYFLAGS   = -DTIMING -DD3_BUFFER_VOL=24*24*12*12
+FFLAGS    = $(MODULES_FLAG) -Oss -pvdiag -par=2 -pardiag=1 -omp -procnum=8 -nosave -contarea=2
+CFLAGS    = -DLongLong
+ARFLAGS   = rv
+
+LDFLAGS   = +BTLB -omp -rdma
+SYSLIBS   = /usr/local/lib/liblrz.a -lf90c -lpl
+
+FAST_MAKE = JOBTYPE=SS prun -p IAPAR gmake -j 8
+
+CKSUM_O   = cksum.o
+RANDOM_O  = ran.o ranf.o
+UUU_O     = uuu_f90.o
+
+LIBD      = libd3.a
+LIBCOMM   = lib_mpi.a
+LIBCLOVER = libclover.a
+
+#===============================================================================

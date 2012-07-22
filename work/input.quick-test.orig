@@ -1,0 +1,29 @@
+run 0
+
+lattice 4 4 4 4
+processes 1 1 1 1
+boundary_conditions_fermions 1 1 1 -1
+
+beta  5
+kappa 0.13
+csw   2.3327
+h     0
+
+hmc_test               0
+hmc_model              C
+hmc_rho                0.1
+hmc_trajectory_length  0.2
+hmc_steps              10
+hmc_accept_first       10
+hmc_m_scale            3
+
+start_configuration    cold
+start_random           default
+
+mc_steps               1
+mc_total_steps         100
+
+solver_rest                  1e-5
+solver_maxiter               1000
+solver_ignore_no_convergence 0
+solver_mre_vectors           7

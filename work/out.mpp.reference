@@ -1,0 +1,113 @@
+ >BeginJob
+ WARNING: check_csw(): c_sw differs more than 0.00005 from ALPHA value !!!
+ >BeginHeader
+ Comment benchmark test HLRN-III
+ Program bqcd benchmark2 (revision 377) 
+ Version_of_D           21
+ Communication MPI
+ Run          571
+ Job            1
+ Host r209i1n0            
+ Date 2011-12-21 16:55:48.308
+ L             48   48   48   96
+ NPE            2   12   12   24
+ bc_fermions    1    1    1   -1
+ gamma_index    1    2    3    4
+ Threads            1
+ Start              1
+ Seed                         0
+ Swap_seq           0
+ N_force            1
+ N_traj             2
+ N_save             0
+ N_temper           1
+ beta_1        5
+ kappa_1       0.13
+ csw_1         1.923076923076923
+ csw_kappa_1      0.250000000000000
+ h_1           0.0
+ tau_1            0.010000000000000
+ N_tau_1       20
+ traj_length_1 0.2
+ rho_1         0.0
+ m_scale_1     1
+ HMC_model A
+ REAL_kind            8
+ CG_rest  1e-99
+ MRE_vectors            0
+ >EndHeader
+ >BeginForceAcceptance
+ T%fa i_fa    e     PlaqEnergy  exp(-Delta_H) CGcalls CGitTot CGitMax
+  %fa    0    1   0.2507903838   0.0000000000      21    2100     100
+ >EndForceAcceptance
+ >BeginMC
+ T%mc  traj  e  f     PlaqEnergy  exp(-Delta_H) Acc CGcalls CGitTot CGitMax
+  %mc     1  1  1   0.2507903838   0.0000000000   0      21    2100     100
+ >EndMC
+ >BeginFooter
+ Date 2011-12-21 16:56:45.177
+ Seed       166035151690961
+ CPU-Time     57.3 s on  6912 CPUs
+ >BeginTiming
+                                                Performance
+ region             #calls     time       mean      min      max      Total
+                                  s    Mflop/s  Mflop/s  Mflop/s    Gflop/s
+ 
+ d_xf                17140     1.57    2608.85  1886.06  2923.54   18032.37
+ d_xb                    0                                                 
+ d_yf                17140     1.54    2670.12  1960.36  2979.83   18455.85
+ d_yb                    0                                                 
+ d_zf                17140     1.45    2836.22  2222.15  3108.16   19603.96
+ d_zb                    0                                                 
+ d_t                 17140     1.58    2398.29  1753.37  2806.79   16576.96
+ D_TOTAL             17140    14.84    1149.54  1038.62  1210.61    7945.62
+ MTDAGMT              4242    18.09    1348.58  1258.99  1402.69    9321.39
+ global_sum           8494     2.89                                        
+ global_sum_vec          0                                                 
+ sc_zero                10     0.00                                        
+ sc_copy                42     0.00                                        
+ sc_scale                0                                                 
+ sc_norm2                0                                                 
+ sc_dot               4200     0.12    1271.92   912.90  1759.23    8791.50
+ sc_axpy              8528     0.17    1859.12  1426.77  2398.29   12850.21
+ sc_xpby             12728     0.32    1455.84  1188.57  1782.86   10062.74
+ sc_axpby                0                                                 
+ sc_cdotc                0                                                 
+ sc_caxpy                0                                                 
+ sc_caxpy2               0                                                 
+ sc_cax2                 0                                                 
+ CG                     42    21.48    1171.55  1170.95  1173.28    8097.77
+ hmc_init_p              2     0.00                                        
+ hmc_u                  40     0.14                                        
+ dsg                    42     0.37                                        
+ dsf                    42     0.06                                        
+ clover_init            41     1.04                                        
+ clover_mult_a        8528     1.78    2025.50  1538.21  2274.40   14000.27
+ clover_mult_ao       8528     1.22    2955.03  2290.00  3129.17   20425.14
+ clover_mult_b         588     0.08    3105.08  2987.53  3130.89   21462.35
+ clover_dsd             42     2.94                                        
+ clover_dsf             84     5.39                                        
+ HMC                     2    33.36                                        
+ plaquette               6     0.03    1614.09  1609.63  3928.48   11156.61
+ cooling                 0                                                 
+ u_read                  0                                                 
+ u_write                 1    22.00                                        
+ TOTAL                   1    57.31                                        
+ hmc_init                2     0.00                                        
+ hmc_momenta             0                                                 
+ hmc_phi                 2     0.10                                        
+ hmc_h_old               2     0.01                                        
+ hmc_backup              2     0.01                                        
+ hmc_half_step0          2     1.47                                        
+ hmc_half_step1          0                                                 
+ hmc_xbound_g           40     1.46                                        
+ hmc_steps              80    29.13                                        
+ hmc_h_new               2     0.01                                        
+ hmc_rest                2     0.00                                        
+ h_mult_a                0                                                 
+ h_mult_b                0                                                 
+ h_mult_c                0                                                 
+ sc2_projection      17140     2.00     473.06   360.11   548.48    3269.78
+ >EndTiming
+ >EndFooter
+ >EndJob

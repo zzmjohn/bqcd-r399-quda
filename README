@@ -30,7 +30,7 @@
 ! enabled GPUs. The new addition to BQCD is mostly contained in
 ! invert_quda.F90 source file.  The files modules/typedef_quda.F90 and
 ! quda_defs.h are actually part of QUDA and will eventually be subsumed
-i! nto QUDA, they are only here for current development.
+! into QUDA, they are only here for current development.
 
 Subdirectories
 ~~~~~~~~~~~~~~

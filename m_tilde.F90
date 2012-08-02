@@ -58,39 +58,28 @@ subroutine mtil(out, in, para, conf)
 
   ALLOCATE_SC_FIELD(tmp)
 
-  call norm2(b, in)
-  write(*,*) "BQCD before oe = ", b
+  if (para%kappa /= ZERO) then
+     call d(ODD, EVEN, tmp, in, conf%u)
+
+     if (para%csw_kappa /= ZERO) call clover_mult_ao(conf%i(1,1,ODD), tmp, volh)
+     if (para%h /= ZERO)         call h_mult_b(-para%h, tmp, volh)
+     
+     call d(EVEN, ODD, out, tmp, conf%u)
+  endif
   
-  call d(ODD, EVEN, out, in, conf%u)
+  b = -para%kappa**2 / (ONE + para%h**2)
+
+  if (para%csw_kappa /= ZERO) then
+     call clover_mult_a(tmp, conf%a(1,1,EVEN), in, volh)
+     call sc_xpby(out, tmp, b)                      ! out = tmp - kappa**2 * out
+  else
+     call sc_xpby(out, in, b)                       ! out = in  - kappa**2 * out
+     if (para%h /= ZERO) call h_mult_a(out, para%h, in, volh)
+  endif
   
   call norm2(b, out)
-  write(*,*) "BQCD after oe = ", b
-
+  
 end subroutine mtil
-   
-!!$  if (para%kappa /= ZERO) then
-!!$     call d(ODD, EVEN, tmp, in, conf%u)
-!!$     if (para%csw_kappa /= ZERO) call clover_mult_ao(conf%i(1,1,ODD), tmp, volh)
-!!$     if (para%h /= ZERO)         call h_mult_b(-para%h, tmp, volh)
-!!$
-!!$     call d(EVEN, ODD, out, tmp, conf%u)
-!!$  endif
-!!$
-!!$  b = -para%kappa**2 / (ONE + para%h**2)
-!!$  write(*,*) "BQCD    b = ", b
-!!$
-!!$  if (para%csw_kappa /= ZERO) then
-!!$     call clover_mult_a(tmp, conf%a(1,1,EVEN), in, volh)
-!!$     call sc_xpby(out, tmp, b)                      ! out = tmp - kappa**2 * out
-!!$  else
-!!$     call sc_xpby(out, in, b)                       ! out = in  - kappa**2 * out
-!!$     if (para%h /= ZERO) call h_mult_a(out, para%h, in, volh)
-!!$  endif
-!!$
-!!$  call norm2(b, out)
-!!$  write(*,*) "BQCD after Xpay eo = ", b
-!!$
-!!$end
 
 !-------------------------------------------------------------------------------
 subroutine mtil_dag(out, in, para, conf)

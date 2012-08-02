@@ -138,7 +138,8 @@ subroutine solve(para, conf, out_e, out_o, in_e, in_o)  ! solves:  M out = in
 
   call mtil_dag(out_o, out_e, para, conf)
 
-  call cg(mtdagmt, out_e, out_o, para, conf, iterations)
+  call quda_solver(mtdagmt, out_e, out_o, para, conf, iterations)
+  !call cg(mtdagmt, out_e, out_o, para, conf, iterations)
 
   call d(ODD, EVEN, out_o, out_e, conf%u)
 

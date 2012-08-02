@@ -44,21 +44,8 @@ subroutine mtdagmt(out, in, para, conf)
 
   ALLOCATE_SC_FIELD(tmp)
 
-  call norm2(rtr, in)
-  write(*,*) "BQCD    b4 = ", rtr
-
-  call mtil(out, in, para, conf)
-
-  !call mtil(tmp, in, para, conf)
-
-  !call norm2(rtr, tmp)
-  !write(*,*) "BQCD    middle = ", rtr
-
-  !call mtil_dag(out, tmp, para, conf)
-
-  call norm2(rtr, out)
-  write(*,*) "BQCD    after = ", rtr
-
+  call mtil(tmp, in, para, conf)
+  call mtil_dag(out, tmp, para, conf)
 
   TIMING_STOP(timing_bin_mtdagmt)
 end

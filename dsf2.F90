@@ -61,7 +61,7 @@ subroutine dsf2(p, conf, step, calc_sf, sf, para)
   call w_mult_dag(b, conf%phi2, para, conf)           ! B = W+ phi2
   call mre_get(solutions, mtil, a, b, para, conf)
   call quda_solver(mtdagmt, a, b, para, conf, iterations) ! A = inv(M~+ M~) Phi
-  call cg(mtdagmt, a, b, para, conf, iterations)      ! A = inv(M~+ M~) W+ phi2
+  !call cg(mtdagmt, a, b, para, conf, iterations)      ! A = inv(M~+ M~) W+ phi2
   call mre_put(solutions, a, calc_sf)                 ! calc_sf <=> reset
   call mtil(b, a, para, conf)                         ! B = M~ A
   if (calc_sf /= 0) sf = dotprod(b, b, SIZE_SC_FIELD)

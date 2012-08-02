@@ -23,15 +23,6 @@
 !
 !-------------------------------------------------------------------------------
 
-! 2012 M Clark
-!
-! This is a branch of the BQCD benchmark (r399) with added QUDA support
-! for the linear solver.  This enables the CG solver to run on CUDA
-! enabled GPUs. The new addition to BQCD is mostly contained in
-! invert_quda.F90 source file.  The files modules/typedef_quda.F90 and
-! quda_defs.h are actually part of QUDA and will eventually be subsumed
-! into QUDA, they are only here for current development.
-
 Subdirectories
 ~~~~~~~~~~~~~~
 

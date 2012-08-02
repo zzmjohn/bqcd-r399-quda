@@ -63,6 +63,7 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
   type(hmc_para),       intent(in)  :: para
   type(hmc_conf),       intent(in)  :: conf
   integer,               intent(out) :: iterations
+  integer mu, p, v
 
   P_SPINCOL_OVERINDEXED, save :: r, tmp
 
@@ -73,8 +74,6 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
   REAL :: rtr2
   type(quda_gauge_param) :: gauge_param
   type(quda_invert_param) :: invert_param
-
-  TIMING_START(timing_bin_cg)
 
   ALLOCATE_SC_OVERINDEXED(r)
   ALLOCATE_SC_OVERINDEXED(tmp)
@@ -90,31 +89,37 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
      call load_clover_quda(conf%a, conf%i, invert_param)
   end if
 
-  do i=1, size_sc_field
-     x(i) = 0.0
-  end do
-  x(1) = 1.0
+  TIMING_START(timing_bin_cg)
 
-  call norm2(rtr, x)
-  write(*,*) "BQCD src = ", rtr
+  !do i=1, size_sc_field
+  !   x(i) = 0.0
+  !end do
+  !x(1) = 1.0
+
+  !call norm2(rtr, x)
+  !write(*,*) "BQCD src = ", rtr
 
   ! will use this to check result on host
-  call matrix_mult(r, x, para, conf)
+  !call matrix_mult(r, x, para, conf)
 
-  call mat_dag_mat_quda(tmp, x, invert_param) 
+  !call dslash_quda(tmp, x, invert_param, QUDA_ODD_PARITY) 
+  !call mat_dag_mat_quda(tmp, x, invert_param) 
 
-  do i=1, size_sc_field
-     write(*,*) r(i), " ", tmp(i)
-  end do
+  !do i=1, size_sc_field
+  !   if ( (r(i).ne.0.0) .or. (tmp(i).ne.0.0) ) then
+  !      write(*,*) i, " " , r(i), " ", tmp(i)
+  !   end if
+  !end do
   
+  !call norm2(rtr, r)
+  !call norm2(rtr2, tmp)
+  !write(*,*) "BQCD mat vec = ", rtr, "QUDA mat vec = ", rtr2
 
-  call norm2(rtr, r)
-  call norm2(rtr2, tmp)
-  write(*,*) "BQCD mat vec = ", rtr, "QUDA mat vec = ", rtr2
-
-  call die("dying")
+  !call die("dying")
 
   call invert_quda(x, b, invert_param)
+
+  TIMING_STOP(timing_bin_cg)
 
   call norm2(rtr, x)
   write(*,*) "BQCD solution = ", rtr
@@ -128,6 +133,8 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
   call norm2(rtr, r)
   write(*,*) "BQCD Residual = ", rtr
 
+  if (rtr <= cg_para%rest) goto 9999
+
   if (cg_para%log /= 2) then
      write(msg, *) "cg(): no convergence; rtr = ", rtr 
      call die(msg)
@@ -136,6 +143,11 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
 9999 continue
 
   niter = invert_param%iter
+
+  cg_stat%ncall = cg_stat%ncall + 1
+  cg_stat%niter = niter
+  cg_stat%niter_max = max(cg_stat%niter_max, niter)
+  cg_stat%niter_tot = cg_stat%niter_tot + niter
   cg_iterations_total = cg_iterations_total + niter
 
   iterations = niter
@@ -146,8 +158,6 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
 
   call free_gauge_quda()
   call end_quda()
-
-  TIMING_STOP(timing_bin_cg)
 
 end
  
@@ -164,6 +174,8 @@ subroutine init_quda_gauge_param(gauge_param)
   type(quda_gauge_param), intent(out) :: gauge_param
   character(72) :: msg
 
+  call new_quda_gauge_param(gauge_param)
+
   gauge_param%x(1) = NX  
   gauge_param%x(2) = NY  
   gauge_param%x(3) = NZ  
@@ -175,7 +187,7 @@ subroutine init_quda_gauge_param(gauge_param)
   gauge_param%link_type = QUDA_SU3_LINKS
   gauge_param%gauge_order = QUDA_BQCD_GAUGE_ORDER
 
-  do i=1,4 !FIXME need to get anti-periodic working in T
+  do i=1,3
      if (bc_fermions(i).ne.1) then
         write(msg, *) "init_quda_gauge_param(): bc not supported in QUDA" 
         call die(msg)
@@ -185,7 +197,7 @@ subroutine init_quda_gauge_param(gauge_param)
 
   gauge_param%cpu_prec = RKIND
   gauge_param%cuda_prec = gauge_param%cpu_prec ! match CUDA precision with BQCD precision
-  gauge_param%reconstruct = QUDA_RECONSTRUCT_NO
+  gauge_param%reconstruct = QUDA_RECONSTRUCT_12
   gauge_param%cuda_prec_sloppy = gauge_param%cuda_prec
   gauge_param%reconstruct_sloppy = gauge_param%reconstruct
   gauge_param%cuda_prec_precondition = gauge_param%cuda_prec_sloppy
@@ -197,7 +209,7 @@ subroutine init_quda_gauge_param(gauge_param)
   y_face = NX*NZ*NT/2
   z_face = NX*NY*NT/2
   t_face = NX*NY*NZ/2
-  gauge_param%ga_pad = max(max(x_face, y_face), max(z_face, t_face))
+  gauge_param%ga_pad = 0 !max(max(x_face, y_face), max(z_face, t_face))
 
   ! these are all set to zero and are not used by the linear solver
   gauge_param%site_ga_pad = 0
@@ -224,6 +236,8 @@ subroutine init_quda_invert_param(invert_param, hmc_param)
   type(quda_invert_param), intent(out) :: invert_param
   type(hmc_para),       intent(in)  :: hmc_param
 
+  call new_quda_invert_param(invert_param)
+
   ! The input and output spinor field both reside on the host
   invert_param%input_location = QUDA_CPU_FIELD_LOCATION
   invert_param%output_location = QUDA_CPU_FIELD_LOCATION
@@ -236,8 +250,9 @@ subroutine init_quda_invert_param(invert_param, hmc_param)
      invert_param%matpc_type = QUDA_MATPC_EVEN_EVEN
   endif
   invert_param%inv_type = QUDA_CG_INVERTER
+  invert_param%inv_type_precondition = QUDA_INVALID_INVERTER
      
-  invert_param%kappa = hmc_param%kappa * 2.0d0
+  invert_param%kappa = hmc_param%kappa !* 2.0d0
      
   invert_param%tol = cg_para%rest ! FIXME: QUDA uses relative, BQCD uses absolute
   invert_param%maxiter = cg_para%maxiter
@@ -258,7 +273,7 @@ subroutine init_quda_invert_param(invert_param, hmc_param)
   invert_param%dirac_order = QUDA_QDP_DIRAC_ORDER
      
   ! BQCD uses UKQCD basis
-  invert_param%gamma_basis = QUDA_UKQCD_GAMMA_BASIS
+  invert_param%gamma_basis = QUDA_UKQCD_GAMMA_BASIS !FIXME
      
   invert_param%clover_cpu_prec = RKIND
   invert_param%clover_cuda_prec = invert_param%clover_cpu_prec
@@ -268,7 +283,7 @@ subroutine init_quda_invert_param(invert_param, hmc_param)
   invert_param%clover_order = QUDA_PACKED_CLOVER_ORDER ! FIXME
   invert_param%use_init_guess = QUDA_USE_INIT_GUESS_YES
   
-  invert_param%verbosity = QUDA_VERBOSE
+  invert_param%verbosity = QUDA_SUMMARIZE
   
   invert_param%sp_pad = 0
   invert_param%cl_pad = 0

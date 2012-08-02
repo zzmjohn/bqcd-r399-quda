@@ -69,10 +69,8 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
   P_SPINCOL_OVERINDEXED, save :: r, tmp
 
   integer       :: i, niter
-  integer(4) :: device
   REAL :: rtr
   character(72) :: msg
-  REAL :: rtr2
   type(quda_gauge_param) :: gauge_param
   type(quda_invert_param) :: invert_param
 

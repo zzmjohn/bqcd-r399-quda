@@ -11,9 +11,16 @@
 *.la
 *.a
 
-# Preprocessed Fortran files
+# Pre-processed Fortran files
 *.f90
 *.mod
 
+# The BQCD binary
+bqcd
+
+# Generated gauge fields
+*.u
+
 # Emacs backup files
 *~
+*#*

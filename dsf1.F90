@@ -49,6 +49,9 @@ subroutine dsf1(p, conf, step, calc_sf, sf, para)
   external                       :: w_mult
   external                       :: w_dagger_w
 
+  ! we need to store the value of kappa and restore after the solve
+  REAL                           :: kappa
+
   sf = ZERO
 
   if (switches%quenched) return
@@ -59,8 +62,8 @@ subroutine dsf1(p, conf, step, calc_sf, sf, para)
   call flip_bc(conf%u)
 
   call mre_get(solutions, w_mult, a, conf%phi, para, conf)
-  write(*,*) "CG W+ W"
-  call cg(w_dagger_w, a, conf%phi, para, conf, iterations) ! A = inv(W+ W~) Phi
+  call quda_solver(w_dagger_w, a, conf%phi, para, conf, iterations, para%rho) ! A = inv(W+ W~) Phi
+  !call cg(w_dagger_w, a, conf%phi, para, conf, iterations) ! A = inv(W+ W~) Phi
   call mre_put(solutions, a, calc_sf)                      ! calc_sf <=> reset
   call w_mult(b, a, para, conf)                            ! B = W~ A
 

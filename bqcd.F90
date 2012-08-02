@@ -41,6 +41,8 @@ program bqcd
 
   call comm_init()
 
+  call init_quda(0) ! FIXME need to sort out MPI topology  
+
   time0 = sekunden()  ! start/initialize timer
 
   TIMING_START(timing_bin_total)
@@ -81,6 +83,8 @@ program bqcd
 
   call write_footer(time0)
   call end(UREC, "Job")
+
+  call end_quda()
 
   call comm_finalize()
 end

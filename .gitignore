@@ -10,3 +10,10 @@
 *.lai
 *.la
 *.a
+
+# Preprocessed Fortran files
+*.f90
+*.mod
+
+# Emacs backup files
+*~

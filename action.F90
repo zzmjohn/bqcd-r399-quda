@@ -51,7 +51,7 @@ REAL function sf(para, conf)  ! returns S_f
 
      call sc_copy(a, conf%phi)                             ! A = phi
 
-     call quda_solver(mtdagmt, a, conf%phi, para, conf, iterations) ! A = inv(M~+ M~) Phi
+     call quda_solver(mtdagmt, a, conf%phi, para, conf, iterations, 0.0) ! A = inv(M~+ M~) Phi
      !call cg(mtdagmt, a, conf%phi, para, conf, iterations) ! A = inv(M~+ M~) Phi
      call mtil(b, a, para, conf)                           ! B = M~ A
 

@@ -45,7 +45,7 @@ end subroutine norm2
 
 
 !-------------------------------------------------------------------------------
-subroutine quda_solver(matrix_mult, x, b, para, conf, iterations) 
+subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho) 
 
   ! calls the QUDA solver
 
@@ -62,7 +62,8 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
   SPINCOL_OVERINDEXED,  intent(in)  :: b
   type(hmc_para),       intent(in)  :: para
   type(hmc_conf),       intent(in)  :: conf
-  integer,               intent(out) :: iterations
+  REAL,                 intent(in)  :: rho
+  integer,              intent(out) :: iterations
   integer mu, p, v
 
   P_SPINCOL_OVERINDEXED, save :: r, tmp
@@ -79,50 +80,27 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
   ALLOCATE_SC_OVERINDEXED(tmp)
 
   call init_quda_gauge_param(gauge_param)
-  call init_quda_invert_param(invert_param, para)
+  call init_quda_invert_param(invert_param, para, rho)
 
-  device = 0
-  call init_quda(device) ! FIXME need to sort out MPI topology
+  TIMING_START(timing_bin_cg)
 
   call load_gauge_quda(conf%u, gauge_param)
   if (invert_param%dslash_type.eq.QUDA_CLOVER_WILSON_DSLASH) then
      call load_clover_quda(conf%a, conf%i, invert_param)
   end if
 
-  TIMING_START(timing_bin_cg)
-
-  !do i=1, size_sc_field
-  !   x(i) = 0.0
-  !end do
-  !x(1) = 1.0
-
-  !call norm2(rtr, x)
-  !write(*,*) "BQCD src = ", rtr
-
-  ! will use this to check result on host
-  !call matrix_mult(r, x, para, conf)
-
   !call dslash_quda(tmp, x, invert_param, QUDA_ODD_PARITY) 
   !call mat_dag_mat_quda(tmp, x, invert_param) 
 
-  !do i=1, size_sc_field
-  !   if ( (r(i).ne.0.0) .or. (tmp(i).ne.0.0) ) then
-  !      write(*,*) i, " " , r(i), " ", tmp(i)
-  !   end if
-  !end do
+  ! account for QUDA using relative residual, BQCD uses absolute residual stopping condition
+  call norm2(rtr, b)
+  invert_param%tol = sqrt(cg_para%rest / rtr) 
   
-  !call norm2(rtr, r)
-  !call norm2(rtr2, tmp)
-  !write(*,*) "BQCD mat vec = ", rtr, "QUDA mat vec = ", rtr2
-
-  !call die("dying")
-
   call invert_quda(x, b, invert_param)
 
-  TIMING_STOP(timing_bin_cg)
-
-  call norm2(rtr, x)
-  write(*,*) "BQCD solution = ", rtr
+  do i = 1, size_sc_field
+     x(i) = x(i) / (1.d0 + rho)**2
+  end do
 
   ! will use this to check result on host
   call matrix_mult(r, x, para, conf)
@@ -157,7 +135,8 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations)
   endif
 
   call free_gauge_quda()
-  call end_quda()
+
+  TIMING_STOP(timing_bin_cg)
 
 end
  
@@ -225,13 +204,14 @@ end subroutine init_quda_gauge_param
 ! Fill the quda_gauge_param.  We are only setting relevent parameters
 ! for the current BQCD benchmark.
 ! -------------------------------------------------------------------------------
-subroutine init_quda_invert_param(invert_param, hmc_param)
+subroutine init_quda_invert_param(invert_param, hmc_param, rho)
 
   use      module_lattice
   use      module_cg
   use      typedef_hmc
   use      typedef_quda
   implicit none
+  REAL     rho
 
   type(quda_invert_param), intent(out) :: invert_param
   type(hmc_para),       intent(in)  :: hmc_param
@@ -252,11 +232,10 @@ subroutine init_quda_invert_param(invert_param, hmc_param)
   invert_param%inv_type = QUDA_CG_INVERTER
   invert_param%inv_type_precondition = QUDA_INVALID_INVERTER
      
-  invert_param%kappa = hmc_param%kappa !* 2.0d0
+  invert_param%kappa = hmc_param%kappa / sqrt(1.d0 + rho)
      
-  invert_param%tol = cg_para%rest ! FIXME: QUDA uses relative, BQCD uses absolute
   invert_param%maxiter = cg_para%maxiter
-  invert_param%reliable_delta = 1e-20 ! no reliable updates
+  invert_param%reliable_delta = 1e-40 ! this ensures no reliable updates (mixed-precision)
   
   invert_param%solution_type = QUDA_MATPCDAG_MATPC_SOLUTION
   invert_param%solve_type = QUDA_NORMEQ_PC_SOLVE
@@ -273,7 +252,7 @@ subroutine init_quda_invert_param(invert_param, hmc_param)
   invert_param%dirac_order = QUDA_QDP_DIRAC_ORDER
      
   ! BQCD uses UKQCD basis
-  invert_param%gamma_basis = QUDA_UKQCD_GAMMA_BASIS !FIXME
+  invert_param%gamma_basis = QUDA_UKQCD_GAMMA_BASIS
      
   invert_param%clover_cpu_prec = RKIND
   invert_param%clover_cuda_prec = invert_param%clover_cpu_prec

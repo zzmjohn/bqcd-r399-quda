@@ -44,6 +44,57 @@ subroutine norm2(nrm2, x)
 end subroutine norm2
 
 
+subroutine compare(b, q, i)
+  use module_vol
+  implicit none
+  SPINCOL_OVERINDEXED, intent(in) :: b
+  SPINCOL_OVERINDEXED, intent(in) :: q
+  SPINCOL_OVERINDEXED, intent(in) :: i
+  REAL b_norm, q_norm, i_norm
+  integer :: s, c
+
+  call norm2(b_norm, b)
+  call norm2(q_norm, q)
+  call norm2(i_norm, i)
+
+  write(*,*) real(b_norm), real(q_norm), real(i_norm), "Dev at ", real(abs(b_norm-q_norm)), real(abs(b_norm-q_norm)/b_norm)
+  if (abs(b_norm-q_norm)/b_norm.gt.1e-6) then
+     do c=1,3
+        do s=1,4
+           write(*,*) b(c*4+s), " ", q(c*4+s), " ", i(c*4+s)
+        end do
+     end do
+     write(*,*) "BQCD = ", b_norm, " QUDA = ", q_norm, " in = ", i_norm
+     call die("Death")
+  end if
+end subroutine compare
+
+
+subroutine clover_rho(conf, rho)
+  use typedef_hmc
+  use module_vol
+
+  implicit none
+  type(hmc_conf),       intent(in)  :: conf
+  REAL, intent(in) :: rho
+  integer          :: i
+  integer          :: chi
+
+  if (rho.ne.0.d0) then
+     do i=1,volh
+        do chi=1,2
+           conf%a(chi,i,EVEN)%i11 = conf%a(chi,i,EVEN)%i11 + rho*0.5
+           conf%a(chi,i,EVEN)%i22 = conf%a(chi,i,EVEN)%i22 + rho*0.5
+           conf%a(chi,i,EVEN)%i33 = conf%a(chi,i,EVEN)%i33 + rho*0.5
+           conf%a(chi,i,EVEN)%i44 = conf%a(chi,i,EVEN)%i44 + rho*0.5
+           conf%a(chi,i,EVEN)%i55 = conf%a(chi,i,EVEN)%i55 + rho*0.5
+           conf%a(chi,i,EVEN)%i66 = conf%a(chi,i,EVEN)%i66 + rho*0.5
+        end do
+     end do
+  end if
+
+end subroutine clover_rho
+
 !-------------------------------------------------------------------------------
 subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho) 
 
@@ -73,6 +124,7 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
   character(72) :: msg
   type(quda_gauge_param) :: gauge_param
   type(quda_invert_param) :: invert_param
+  integer :: chi
 
   ALLOCATE_SC_OVERINDEXED(r)
   ALLOCATE_SC_OVERINDEXED(tmp)
@@ -84,7 +136,11 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
 
   call load_gauge_quda(conf%u, gauge_param)
   if (invert_param%dslash_type.eq.QUDA_CLOVER_WILSON_DSLASH) then
+
+     call clover_rho(conf, rho)
      call load_clover_quda(conf%a, conf%i, invert_param)
+     call clover_rho(conf, -rho)
+
   end if
 
   !call dslash_quda(tmp, x, invert_param, QUDA_ODD_PARITY) 
@@ -96,9 +152,12 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
   
   call invert_quda(x, b, invert_param)
 
-  do i = 1, size_sc_field
-     x(i) = x(i) / (1.d0 + rho)**2
-  end do
+  ! We need to rescale the solution to account for the Hasenbusch shift (if present)
+  if ( (invert_param%dslash_type.eq.QUDA_WILSON_DSLASH) .and. (rho.ne.0.0) ) then
+     do i = 1, size_sc_field
+        x(i) = x(i) / (1.d0 + rho)**2
+     end do
+  end if
 
   ! will use this to check result on host
   call matrix_mult(r, x, para, conf)
@@ -136,7 +195,7 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
 
   TIMING_STOP(timing_bin_cg)
 
-end
+end subroutine quda_solver
  
 !-------------------------------------------------------------------------------
 ! Fill the quda_gauge_param
@@ -230,8 +289,14 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   invert_param%inv_type = QUDA_CG_INVERTER
   invert_param%inv_type_precondition = QUDA_INVALID_INVERTER
      
-  invert_param%kappa = hmc_param%kappa / sqrt(1.d0 + rho)
-     
+  write(*,*) "Setting kappa = ", hmc_param%kappa / sqrt(1.d0 + rho), hmc_param%kappa, rho 
+
+  if (invert_param%dslash_type.eq.QUDA_WILSON_DSLASH) then
+     invert_param%kappa = hmc_param%kappa / sqrt(1.d0 + rho)
+  else
+     invert_param%kappa = hmc_param%kappa
+  end if
+
   invert_param%maxiter = cg_para%maxiter
   invert_param%reliable_delta = 1e-40 ! this ensures no reliable updates (mixed-precision)
   
@@ -257,10 +322,10 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   invert_param%clover_cuda_prec_sloppy = invert_param%clover_cuda_prec
   invert_param%clover_cuda_prec_precondition = invert_param%clover_cuda_prec_precondition
   
-  invert_param%clover_order = QUDA_PACKED_CLOVER_ORDER ! FIXME
+  invert_param%clover_order = QUDA_BQCD_CLOVER_ORDER
   invert_param%use_init_guess = QUDA_USE_INIT_GUESS_YES
   
-  invert_param%verbosity = QUDA_SUMMARIZE
+  invert_param%verbosity = QUDA_VERBOSE
   
   invert_param%sp_pad = 0
   invert_param%cl_pad = 0

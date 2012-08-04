@@ -165,6 +165,7 @@
 #define QudaCloverFieldOrder integer(4)
 #define QUDA_PACKED_CLOVER_ORDER 0    // even-odd packed
 #define QUDA_LEX_PACKED_CLOVER_ORDER 1 // lexicographical order packed
+#define QUDA_BQCD_CLOVER_ORDER 2 // BQCD order which is a packed super-diagonal form
 #define QUDA_INVALID_CLOVER_ORDER QUDA_INVALID_ENUM
 
 #define QudaVerbosity integer(4)

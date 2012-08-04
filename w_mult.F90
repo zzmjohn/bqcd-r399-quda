@@ -23,12 +23,15 @@
 !
 !-------------------------------------------------------------------------------
 # include "defs.h"
+# include "quda_defs.h"
  
 !-------------------------------------------------------------------------------
 subroutine w_mult(out, in, para, conf)  ! out = W in
 
+  use typedef_quda
   use typedef_hmc
   use module_vol
+  use      module_p_interface
   implicit none
 
   type(hmc_para), intent(in)  :: para
@@ -37,9 +40,52 @@ subroutine w_mult(out, in, para, conf)  ! out = W in
   SPINCOL_FIELD,  intent(out) :: out
   SPINCOL_FIELD,  intent(in)  :: in
 
+  P_SPINCOL_FIELD       :: quda_tmp
+  type(quda_gauge_param) :: gauge_param
+  type(quda_invert_param) :: invert_param
+  integer quda, chi, i
+  REAL rho
+
+  rho = para%rho
+
+  quda = 0
+  if (quda.eq.1) then
+     call init_quda_gauge_param(gauge_param)
+     call init_quda_invert_param(invert_param, para, rho)
+
+     call load_gauge_quda(conf%u, gauge_param)
+     if (invert_param%dslash_type.eq.QUDA_CLOVER_WILSON_DSLASH) then
+        call clover_rho(conf, rho)
+        call load_clover_quda(conf%a, conf%i, invert_param)
+        call clover_rho(conf, -rho)
+     end if
+     
+     ALLOCATE_SC_FIELD(quda_tmp)
+  end if
+
   call mtil(out, in, para, conf)
+  
+  if (quda.eq.1) then
+     write(*,*) "M check"
+     call mat_quda(quda_tmp, in, invert_param)
+     !call compare(out, quda_tmp, in)
+     !  call sc_axpy(quda_tmp, in, para%rho)
+  end if
 
   call sc_axpy(out, in, para%rho)
+
+  if (quda.eq.1) then
+     write(*,*) "W check"
+     call compare(out, quda_tmp, in)
+    
+     if (invert_param%dslash_type.eq.QUDA_CLOVER_WILSON_DSLASH) then
+        call free_clover_quda()
+     endif
+     
+     call free_gauge_quda()
+  end if
+
+  !call die("bungeee")
 
 end
 

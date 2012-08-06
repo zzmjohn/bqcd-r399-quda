@@ -24,8 +24,8 @@
 #-------------------------------------------------------------------------------
 
 timing    = 1
-mpi       = 
-omp       = 
+mpi       = 1
+omp       = 1
 debug     = 
 libd      = 21
 
@@ -48,7 +48,8 @@ ARFLAGS   = rv
 
 CUDA_DIR = /usr/local/cuda
 QUDA_DIR = /home/mclark/github/quda
-LDFLAGS   = -L$(QUDA_DIR)/lib -lquda -L$(CUDA_DIR)/lib64 -lcudart -lstdc++ 
+# need the mpi_cxx library since we are using gfortran for linking
+LDFLAGS   = -L$(QUDA_DIR)/lib -lquda -L$(CUDA_DIR)/lib64 -lcudart -lstdc++ -lmpi_cxx
 SYSLIBS   = 
 
 FAST_MAKE = make -j 8

@@ -36,7 +36,7 @@ subroutine norm2(nrm2, x)
   integer :: i
 
   nrm2 = ZERO
-  !$omp parallel do reduction(+: rtrold)
+  !$omp parallel do reduction(+: nrm2)
   do i = 1, size_sc_field
      nrm2 = nrm2 + x(i)**2
   end do
@@ -245,7 +245,7 @@ subroutine init_quda_gauge_param(gauge_param)
   y_face = NX*NZ*NT/2
   z_face = NX*NY*NT/2
   t_face = NX*NY*NZ/2
-  gauge_param%ga_pad = 0 !max(max(x_face, y_face), max(z_face, t_face))
+  gauge_param%ga_pad = max(max(x_face, y_face), max(z_face, t_face))
 
   ! these are all set to zero and are not used by the linear solver
   gauge_param%site_ga_pad = 0

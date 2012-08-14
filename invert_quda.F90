@@ -289,8 +289,6 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   invert_param%inv_type = QUDA_CG_INVERTER
   invert_param%inv_type_precondition = QUDA_INVALID_INVERTER
      
-  write(*,*) "Setting kappa = ", hmc_param%kappa / sqrt(1.d0 + rho), hmc_param%kappa, rho 
-
   if (invert_param%dslash_type.eq.QUDA_WILSON_DSLASH) then
      invert_param%kappa = hmc_param%kappa / sqrt(1.d0 + rho)
   else
@@ -325,7 +323,7 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   invert_param%clover_order = QUDA_BQCD_CLOVER_ORDER
   invert_param%use_init_guess = QUDA_USE_INIT_GUESS_YES
   
-  invert_param%verbosity = QUDA_VERBOSE
+  invert_param%verbosity = QUDA_SUMMARIZE
   
   invert_param%sp_pad = 0
   invert_param%cl_pad = 0

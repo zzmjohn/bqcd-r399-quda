@@ -25,13 +25,13 @@
 
 timing    = 1
 mpi       = 1
-omp       = 1
+omp       = 
 debug     = 
 libd      = 21
 
 #-------------------------------------------------------------------------------
 
-SHELL     = /bin/ksh
+SHELL     = /bin/bash
 
 FPP       = cpp -E -C -P
 F90       = gfortran
@@ -47,7 +47,7 @@ CFLAGS_STD= -DNamesToLower_
 ARFLAGS   = rv
 
 CUDA_DIR = /usr/local/cuda
-QUDA_DIR = /home/mclark/github/quda
+QUDA_DIR = /home/mikec/github/quda
 # need the mpi_cxx library since we are using gfortran for linking
 LDFLAGS   = -L$(QUDA_DIR)/lib -lquda -L$(CUDA_DIR)/lib64 -lcudart -lstdc++ -lmpi_cxx
 SYSLIBS   = 

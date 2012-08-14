@@ -41,8 +41,6 @@ program bqcd
 
   call comm_init()
 
-  call init_quda(0) ! FIXME need to sort out MPI topology  
-
   time0 = sekunden()  ! start/initialize timer
 
   TIMING_START(timing_bin_total)
@@ -54,6 +52,8 @@ program bqcd
   call init_counter(para, flags)
   call init_ran(para, flags)
   call init_cooling(input%measure_cooling_list)
+
+  write(*,*) para%NPE(1), para%NPE(2), para%NPE(3), para%NPE(4) 
 
   call set_fmt_ensemble(para%n_temper)
   call check_fmt(para%run, para%n_temper, para%maxtraj, para%L(4) - 1)
@@ -70,6 +70,9 @@ program bqcd
   call init_confs(para, conf)
 
   call check_former(para%n_temper, conf)
+
+  call comm_set_gridsize(para%NPE)
+  call init_quda(-1) ! Must be after init_para, since this is where topology is read in
 
   call mc(para, conf)
   !!call xbound_test()

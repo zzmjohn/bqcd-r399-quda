@@ -102,7 +102,7 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
   use      module_p_interface
   use      module_vol
   use      typedef_hmc
-  use      module_quda
+  use      quda_fortran
   implicit none
 
   external                          :: matrix_mult
@@ -197,7 +197,7 @@ end subroutine quda_solver
 subroutine init_quda_gauge_param(gauge_param)
 
   use      module_lattice
-  use      module_quda
+  use      quda_fortran
   implicit none
   integer i
   integer x_face, y_face, z_face, t_face
@@ -260,7 +260,7 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   use      module_lattice
   use      module_cg
   use      typedef_hmc
-  use      module_quda
+  use      quda_fortran
   implicit none
   REAL     rho
 

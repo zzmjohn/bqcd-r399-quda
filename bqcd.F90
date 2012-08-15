@@ -73,7 +73,7 @@ program bqcd
 
 #ifdef QUDA_SOLVER
   call comm_set_gridsize(para%NPE) ! awaiting the official QUDA interface for this
-  call init_quda(1) ! Must be after init_para, since this is where topology is read in
+  call init_quda(-1) ! Must be after init_para, since this is where topology is read in
 #endif
 
   call mc(para, conf)

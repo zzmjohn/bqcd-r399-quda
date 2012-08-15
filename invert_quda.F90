@@ -267,6 +267,8 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   type(quda_invert_param), intent(out) :: invert_param
   type(hmc_para),       intent(in)  :: hmc_param
 
+  character(72) :: msg
+
   call new_quda_invert_param(invert_param)
 
   ! The input and output spinor field both reside on the host
@@ -287,6 +289,11 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
      invert_param%kappa = hmc_param%kappa / sqrt(1.d0 + rho)
   else
      invert_param%kappa = hmc_param%kappa
+  end if
+
+  if (hmc_param%h /= ZERO) then
+     write(msg, *) "Hermitian operator not supported by QUDA"
+     call die(msg)
   end if
 
   invert_param%maxiter = cg_para%maxiter

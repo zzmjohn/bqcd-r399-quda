@@ -23,7 +23,7 @@
 !
 !-------------------------------------------------------------------------------
 # include "defs.h"
-# include "quda_defs.h"
+# include <enum_quda_fortran.h>
 
 !-------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ subroutine compare(b, q, i)
   SPINCOL_OVERINDEXED, intent(in) :: q
   SPINCOL_OVERINDEXED, intent(in) :: i
   REAL b_norm, q_norm, i_norm
-  integer :: s, c
+  integer :: s, c, z
 
   call norm2(b_norm, b)
   call norm2(q_norm, q)
@@ -59,13 +59,10 @@ subroutine compare(b, q, i)
 
   write(*,*) real(b_norm), real(q_norm), real(i_norm), "Dev at ", real(abs(b_norm-q_norm)), real(abs(b_norm-q_norm)/b_norm)
   if (abs(b_norm-q_norm)/b_norm.gt.1e-6) then
-     do c=1,3
-        do s=1,4
-           write(*,*) b(c*4+s), " ", q(c*4+s), " ", i(c*4+s)
-        end do
+     do z=1,24
+        write(*,*) z, " ", b(z), " ", q(z), " ", i(z)
      end do
      write(*,*) "BQCD = ", b_norm, " QUDA = ", q_norm, " in = ", i_norm
-     call die("Death")
   end if
 end subroutine compare
 
@@ -105,7 +102,7 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
   use      module_p_interface
   use      module_vol
   use      typedef_hmc
-  use      typedef_quda
+  use      module_quda
   implicit none
 
   external                          :: matrix_mult
@@ -143,9 +140,6 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
 
   end if
 
-  !call dslash_quda(tmp, x, invert_param, QUDA_ODD_PARITY) 
-  !call mat_dag_mat_quda(tmp, x, invert_param) 
-
   ! account for QUDA using relative residual, BQCD uses absolute residual stopping condition
   call norm2(rtr, b)
   invert_param%tol = sqrt(cg_para%rest / rtr) 
@@ -166,7 +160,7 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
      r(i) = b(i) - r(i)
   end do
   call norm2(rtr, r)
-  write(*,*) "BQCD Residual = ", rtr
+  !write(*,*) "BQCD Residual = ", rtr
 
   if (rtr <= cg_para%rest) goto 9999
 
@@ -203,7 +197,7 @@ end subroutine quda_solver
 subroutine init_quda_gauge_param(gauge_param)
 
   use      module_lattice
-  use      typedef_quda
+  use      module_quda
   implicit none
   integer i
   integer x_face, y_face, z_face, t_face
@@ -266,7 +260,7 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   use      module_lattice
   use      module_cg
   use      typedef_hmc
-  use      typedef_quda
+  use      module_quda
   implicit none
   REAL     rho
 
@@ -323,11 +317,11 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   invert_param%clover_order = QUDA_BQCD_CLOVER_ORDER
   invert_param%use_init_guess = QUDA_USE_INIT_GUESS_YES
   
-  invert_param%verbosity = QUDA_SUMMARIZE
+  invert_param%verbosity = QUDA_SILENT
   
   invert_param%sp_pad = 0
   invert_param%cl_pad = 0
   
-  invert_param%tune = QUDA_TUNE_NO
+  invert_param%tune = QUDA_TUNE_YES
      
 end subroutine init_quda_invert_param

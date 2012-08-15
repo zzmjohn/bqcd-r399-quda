@@ -64,8 +64,11 @@ subroutine hmc_init_phi(conf, para, sf1, sf2)
      call ran_gauss_volh(NDIRAC * NCOL, tmp, HALF, EVEN) ! tmp = noise
      sf2 = dotprod(tmp, tmp, SIZE_SC_FIELD)
      call mtil_dag(conf%phi2, tmp, para, conf)       ! phi2 = M~+ noise
+#ifdef QUDA_SOLVER
      call quda_solver(w_dagger_w, tmp, conf%phi2, para, conf, iterations, para%rho)
-     !call cg(w_dagger_w, tmp, conf%phi2, para, conf, iterations)
+#else
+     call cg(w_dagger_w, tmp, conf%phi2, para, conf, iterations)
+#endif
                                                      ! tmp = inv(W+ W) M~+ noise
      call w_mult(conf%phi2, tmp, para, conf)         ! phi2 = inv(W+) M~+ noise
   endif

@@ -31,23 +31,24 @@ libd      = 21
 
 #-------------------------------------------------------------------------------
 
+CUDA_DIR = /usr/local/cuda
+QUDA_DIR = /home/mclark/github/quda
+
 SHELL     = /bin/bash
 
-FPP       = cpp -E -C -P
-F90       = gfortran
+MODULES_FLAG = -I$(MODULES_DIR) -I$(QUDA_DIR)/lib
+
+FPP       = cpp -E -C -P -I$(QUDA_DIR)/include 
 CC        = gcc
+F90       = gfortran
 AR        = ar
 RANLIB    = echo
-
-MODULES_FLAG = -I$(MODULES_DIR)
 
 MYFLAGS   = 
 FFLAGS_STD= $(MODULES_FLAG) -fno-range-check
 CFLAGS_STD= -DNamesToLower_
 ARFLAGS   = rv
 
-CUDA_DIR = /usr/local/cuda
-QUDA_DIR = /home/mikec/github/quda
 # need the mpi_cxx library since we are using gfortran for linking
 LDFLAGS   = -L$(QUDA_DIR)/lib -lquda -L$(CUDA_DIR)/lib64 -lcudart -lstdc++ -lmpi_cxx
 SYSLIBS   = 

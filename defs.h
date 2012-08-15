@@ -27,6 +27,8 @@
 #ifndef BQCD_DEFS_H
 #define BQCD_DEFS_H
 
+# define QUDA_SOLVER 1
+
 # define MAX_TEMPER 50
 
 # define RKIND  8

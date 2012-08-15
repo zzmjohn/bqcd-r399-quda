@@ -125,8 +125,6 @@ subroutine cg(matrix_mult, x, b, para, conf, iterations)
 
 9999 continue
 
-write(*,*) "CG"
-
   cg_stat%ncall = cg_stat%ncall + 1
   cg_stat%niter = niter
   cg_stat%niter_max = max(cg_stat%niter_max, niter)

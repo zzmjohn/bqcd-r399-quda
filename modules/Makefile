@@ -38,7 +38,6 @@ fpp = $(FPP) -I.. $(MYFLAGS)
 MODULES_DIR = .
 
 MODULES = \
-	typedef_quda.o \
 	typedef_cksum.o \
 	typedef_clover.o \
 	typedef_flags.o \

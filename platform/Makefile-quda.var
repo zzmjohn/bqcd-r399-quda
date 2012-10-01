@@ -33,10 +33,10 @@ libd      = 21
 #-------------------------------------------------------------------------------
 
 # specify the location of CUDA toolkit
-CUDA_DIR = /usr/local/cuda
+export CUDA_DIR
 
 # specify the location of the QUDA library
-QUDA_DIR = /home/mclark/github/quda
+export QUDA_DIR
 
 SHELL     = /bin/bash
 
@@ -48,7 +48,7 @@ F90       = gfortran
 AR        = ar
 RANLIB    = echo
 
-MYFLAGS   = 
+MYFLAGS   = $(QUDA_FLAGS)
 FFLAGS_STD= $(MODULES_FLAG) -fno-range-check
 CFLAGS_STD= -DNamesToLower_
 ARFLAGS   = rv

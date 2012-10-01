@@ -32,10 +32,10 @@ libd      = 21
 #-------------------------------------------------------------------------------
 
 # specify the location of CUDA toolkit
-CUDA_DIR = /opt/nvidia/cudatoolkit/5.0.33.103
+export CUDA_DIR
 
 # specify the location of the QUDA library
-QUDA_DIR = /tmp/work/clarkm/quda
+export QUDA_DIR
 
 SHELL     = /bin/bash
 
@@ -47,7 +47,7 @@ F90       = ftn
 AR        = ar
 RANLIB    = echo
 
-MYFLAGS   = 
+MYFLAGS   = $(QUDA_FLAGS)
 FFLAGS_STD= $(MODULES_FLAG) -fno-range-check
 CFLAGS_STD= -DNamesToLower_
 ARFLAGS   = rv

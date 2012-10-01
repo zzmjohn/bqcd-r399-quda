@@ -323,9 +323,13 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   
   invert_param%clover_order = QUDA_BQCD_CLOVER_ORDER
   invert_param%use_init_guess = QUDA_USE_INIT_GUESS_YES
-  
+
+#ifdef QUDA_SUMMARIZE  
+  invert_param%verbosity = QUDA_SUMMARIZE
+#else
   invert_param%verbosity = QUDA_SILENT
-  
+#endif  
+
   invert_param%sp_pad = 0
   invert_param%cl_pad = 0
   

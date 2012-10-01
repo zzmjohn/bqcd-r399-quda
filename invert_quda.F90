@@ -170,7 +170,9 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
   endif
 
 #ifdef QUDA_SUMMARIZE
-  if (my_pe() == 0) then write(*,*) "QUDA successfully converged in ", invert_param%iter, "iterations at ", invert_param%gflops, " Gflops"
+  if (my_pe() == 0) then 
+     write(*,*) "QUDA successfully converged in ", invert_param%iter, "iterations at ", invert_param%gflops, " Gflops"
+  endif
 #endif
 
 9999 continue

@@ -1,6 +1,6 @@
 #===============================================================================
 #
-# Makefile-gnu-mpich.var - GNU compiler, MPICH style MPI
+# Makefile-quda.var - GNU compiler, MPICH style MPI
 #
 #-------------------------------------------------------------------------------
 #
@@ -31,7 +31,10 @@ libd      = 21
 
 #-------------------------------------------------------------------------------
 
+# specify the location of CUDA toolkit
 CUDA_DIR = /usr/local/cuda
+
+# specify the location of the QUDA library
 QUDA_DIR = /home/mclark/github/quda
 
 SHELL     = /bin/bash

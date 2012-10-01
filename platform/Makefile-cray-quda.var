@@ -37,6 +37,9 @@ export CUDA_DIR
 # specify the location of the QUDA library
 export QUDA_DIR
 
+# specify any QUDA-specific flags that control interface behaviour
+export QUDA_FLAGS
+
 SHELL     = /bin/bash
 
 MODULES_FLAG = -I$(MODULES_DIR) -I$(QUDA_DIR)/lib

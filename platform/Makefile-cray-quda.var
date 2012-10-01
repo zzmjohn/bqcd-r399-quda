@@ -1,8 +1,7 @@
 #===============================================================================
 #
-# Makefile-quda.var - GNU compiler, MPICH style MPI, with CUDA
-# acceleration through the QUDA library.
-#
+# Makefile-cray-quda.var - Cray XK6 and Cray XK7 with
+# CUDA-acceleration through the QUDA library
 #-------------------------------------------------------------------------------
 #
 # Copyright (C) 2012 Hinnerk Stueben
@@ -33,18 +32,18 @@ libd      = 21
 #-------------------------------------------------------------------------------
 
 # specify the location of CUDA toolkit
-CUDA_DIR = /usr/local/cuda
+CUDA_DIR = /opt/nvidia/cudatoolkit/5.0.33.103
 
 # specify the location of the QUDA library
-QUDA_DIR = /home/mclark/github/quda
+QUDA_DIR = /tmp/work/clarkm/quda
 
 SHELL     = /bin/bash
 
 MODULES_FLAG = -I$(MODULES_DIR) -I$(QUDA_DIR)/lib
 
 FPP       = cpp -E -C -P -I$(QUDA_DIR)/include 
-CC        = gcc
-F90       = gfortran
+CC        = cc
+F90       = ftn
 AR        = ar
 RANLIB    = echo
 
@@ -54,7 +53,7 @@ CFLAGS_STD= -DNamesToLower_
 ARFLAGS   = rv
 
 # need the mpi_cxx library since we are using gfortran for linking
-LDFLAGS   = -L$(QUDA_DIR)/lib -lquda -L$(CUDA_DIR)/lib64 -lcudart -lstdc++ -lmpi_cxx
+LDFLAGS   = -L$(QUDA_DIR)/lib -lquda -L$(CUDA_DIR)/lib64 -lcudart -lstdc++ #-lmpi_cxx
 SYSLIBS   = 
 
 FAST_MAKE = make -j 8
@@ -73,7 +72,7 @@ ifdef timing
 endif
 
 ifdef mpi
-    F90       = mpif90    
+    F90       = ftn    
     MYFLAGS  += -DUSE_MPI_WTIME
     LIBCOMM   = lib_mpi.a
 endif

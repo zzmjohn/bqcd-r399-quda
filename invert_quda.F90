@@ -169,6 +169,10 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
      call die(msg)
   endif
 
+#ifdef QUDA_SUMMARIZE
+  write(*,*) "QUDA successfully converged in ", invert_param%iter, " at ", invert_param%gflops, " Gflops"
+#endif
+
 9999 continue
 
   niter = invert_param%iter

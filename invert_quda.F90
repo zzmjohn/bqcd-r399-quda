@@ -340,5 +340,7 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   invert_param%cl_pad = 0
   
   invert_param%tune = QUDA_TUNE_YES
+
+  invert_param%residual_type = QUDA_L2_RELATIVE_RESIDUAL
      
 end subroutine init_quda_invert_param

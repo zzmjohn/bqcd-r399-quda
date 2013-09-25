@@ -241,7 +241,7 @@ subroutine init_quda_gauge_param(gauge_param)
   gauge_param%gauge_fix = QUDA_GAUGE_FIXED_NO
 
   ! compute the required pad size (this is where the backward links on the zero boundary are stored
-  x_face = NX*NY*NZ/2
+  x_face = NY*NY*NZ/2
   y_face = NX*NZ*NT/2
   z_face = NX*NY*NT/2
   t_face = NX*NY*NZ/2

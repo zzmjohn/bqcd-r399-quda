@@ -140,9 +140,7 @@ subroutine quda_solver(matrix_mult, x, b, para, conf, iterations, rho)
 
   end if
 
-  ! account for QUDA using relative residual, BQCD uses absolute residual stopping condition
-  call norm2(rtr, b)
-  invert_param%tol = sqrt(cg_para%rest / rtr) 
+  invert_param%tol = sqrt(cg_para%rest) 
   
   call invert_quda(x, b, invert_param)
 
@@ -341,6 +339,6 @@ subroutine init_quda_invert_param(invert_param, hmc_param, rho)
   
   invert_param%tune = QUDA_TUNE_YES
 
-  invert_param%residual_type = QUDA_L2_RELATIVE_RESIDUAL
+  invert_param%residual_type = QUDA_L2_ABSOLUTE_RESIDUAL
      
 end subroutine init_quda_invert_param
